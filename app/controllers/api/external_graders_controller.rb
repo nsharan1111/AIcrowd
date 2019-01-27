@@ -39,7 +39,15 @@ class Api::ExternalGradersController < Api::BaseController
       raise ChallengeRoundNotOpen unless challenge_round_open?(challenge)
       raise ParticipantNotQualified unless participant_qualified?(challenge,participant)
       raise ParallelSubmissionLimitExceeded unless parallel_submissions_allowed?(challenge,participant)
+      
+      challenge_participant = challenge
+        .challenge_participants
+        .find_by(participant_id: participant.id)
 
+      if challenge_participant.blank? or !challenge_participant.accepted_dataset_toc
+        raise TermsNotAcceptedByParticipant
+      end
+      
       submissions_remaining, reset_dttm = challenge.submissions_remaining(participant.id)
       raise NoSubmissionSlotsRemaining if submissions_remaining < 1
       if params[:meta].present?
@@ -415,6 +423,12 @@ class Api::ExternalGradersController < Api::BaseController
 
   class ParallelSubmissionLimitExceeded < StandardError
     def initialize(msg='You have exceeded the allowed number of parallel submissions. Please wait until your other submission(s) are graded.')
+      super
+    end
+  end
+
+  class TermsNotAcceptedByParticipant < StandardError
+    def initialize(msg="The Participant has not registered for this challenge. Please visit https://crowdai.com and register by clicking the participate button and agreeing to the terms of participation")
       super
     end
   end

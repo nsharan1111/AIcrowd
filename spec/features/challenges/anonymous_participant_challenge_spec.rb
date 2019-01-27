@@ -10,9 +10,8 @@ feature "challenge", js: true do
       visit '/'
     end
     specify { expect(page).to have_link challenge.challenge }
-    specify { expect(page).to have_link 'Log in' }
-    specify { expect(page).to have_link 'Sign up' }
-    # specify { expect(page).to have_link 'Knowledge Base' }
+    specify { expect(page).to have_selector(:link_or_button, 'Log in')}
+    specify { expect(page).to have_link 'Blog' }
     specify { expect(page).to have_link 'Challenges' }
   end
 
@@ -44,6 +43,13 @@ feature "challenge", js: true do
       expect(page).to have_content 'Leaderboard'
     end
 
+    scenario "can follow Discussion link" do
+      click_link "Discussion"
+      expect(page).to have_content 'Discussion'
+      click_link 'New Topic'
+      expect(page).to have_content 'You need to sign in or sign up before continuing.'
+    end
+
     scenario "cannot follow Dataset link" do
       click_link "Dataset"
       expect(page).to have_content 'You need to sign in or sign up before continuing.'
@@ -54,6 +60,13 @@ feature "challenge", js: true do
     before(:example) do
       visit '/'
       click_link challenge.challenge
+    end
+
+    scenario "follow Discussion link" do
+      click_link "Discussion"
+      expect(page).to have_content 'Discussion'
+      click_link 'New Topic'
+      expect(page).to have_content 'You need to sign in or sign up before continuing.'
     end
 
     scenario "follow Dataset link" do

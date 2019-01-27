@@ -3,6 +3,10 @@ class SubmissionsController < ApplicationController
   before_action :set_submission,
     only: [:show, :edit, :update ]
   before_action :set_challenge
+  before_action :check_participation_terms, only: [:new, :create]
+  # Before we allow user to make submissions we will check if they have agreed to the toc
+  # Keep in mind that this is part of aicrowd flow not crowdAI flow
+  # So this is needed if / when we refactor submissions
   before_action :set_s3_direct_post,
     only: [:new, :edit, :create, :update]
   before_action :set_submissions_remaining, except: :show
@@ -127,6 +131,16 @@ class SubmissionsController < ApplicationController
 
     def set_challenge
       @challenge = Challenge.friendly.find(params[:challenge_id])
+    end
+    
+    def check_participation_terms
+      @challenge_participant = @challenge
+        .challenge_participants
+        .find_by(participant_id: current_participant.id)
+
+      if !@challenge_participant or !@challenge_participant.accepted_dataset_toc
+        redirect_to challenge_path(@challenge)
+      end
     end
 
     def grader_logs

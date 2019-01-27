@@ -105,7 +105,7 @@ Rails.application.routes.draw do
     resources :invitations, only: [] do
       collection { post :import }
     end
-    resources :dataset_terms, only: [:update]
+    resources :participation_terms, only: [:create, :index]
   end
   get '/load_more_challenges', to: 'challenges#load_more', as: :load_more_challenges
 
